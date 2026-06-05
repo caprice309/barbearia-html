@@ -43,14 +43,33 @@ servicos.forEach(servico => {
 
 document.getElementById("form-agendamento").addEventListener("submit", function(event) {
     event.preventDefault();
+
     const nome = document.getElementById("nome").value;
+    const telefone = document.getElementById("telefone").value;
+    const servico = document.getElementById("servico-escolhido").options[document.getElementById("servico-escolhido").selectedIndex].text;
     const dataEscolhida = document.getElementById("data").value;
+    const hora = document.getElementById("hora").value;
+
     const dataAtual = new Date().toISOString().split("T")[0];
     
     if (dataEscolhida < dataAtual) {
-        alert("Erro: Não é possível realizar um agendamento numa data que já passou. Por favor, escolha outra data.");
+        alert("Erro: Não é possível realizar um agendamento numa data que já passou.");
         return;
     }
+
+    const novoAgendamento = {
+        nome: nome,
+        telefone: telefone,
+        servico: servico,
+        data: dataEscolhida,
+        hora: hora
+    };
+
+    let listaAgendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+    
+    listaAgendamentos.push(novoAgendamento);
+    
+    localStorage.setItem("agendamentos", JSON.stringify(listaAgendamentos));
 
     alert(`Tudo certo, ${nome}! O seu agendamento foi recebido com sucesso.`);
     this.reset();

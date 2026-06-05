@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Barbeiro</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .painel-container { max-width: 900px; margin: 40px auto; padding: 20px; background: white; border-radius: var(--arredondamento); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: var(--fonte-textos); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: var(--cor-azul); color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        #conteudo-admin { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span style="font-size: 2.2rem;">💈</span>
+            <h1>Área Restrita - Barbeiro</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Voltar ao Site</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="conteudo-admin">
+        <div class="painel-container">
+            <h2>Agenda de Clientes</h2>
+            <p>Aqui estão os agendamentos recebidos pelo site:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Serviço</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-agendamentos">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const senhaCorreta = "admin123";
+        let tentativa = prompt("Área Restrita. Digite a senha de acesso:");
+
+        if (tentativa === senhaCorreta) {
+            document.getElementById("conteudo-admin").style.display = "block"; 
+            carregarAgendamentos();
+        } else {
+            alert("Senha incorreta! Acesso negado.");
+            window.location.href = "index.html";
+        }
+
+        function carregarAgendamentos() {
+            const tabela = document.getElementById("tabela-agendamentos");
+            const agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+            if (agendamentos.length === 0) {
+                tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Nenhum agendamento ainda.</td></tr>";
+                return;
+            }
+
+            agendamentos.forEach(agenda => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td><strong>${agenda.nome}</strong></td>
+                    <td>${agenda.telefone}</td>
+                    <td>${agenda.servico}</td>
+                    <td>${agenda.data}</td>
+                    <td>${agenda.hora}</td>
+                `;
+                tabela.appendChild(linha);
+            });
+        }
+    </script>
+</body>
+</html>
