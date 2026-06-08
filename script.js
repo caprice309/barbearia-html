@@ -174,7 +174,7 @@ if (formAgendamento) {
                     hora_agendamento: hora,
                     servico: servico
                 };
-                emailjs.send("service_xxxxx", "template_xxxxx", parametrosEmail).catch(() => {});
+                emailjs.send("service_04c6d6n", "template_bzkwmpp", parametrosEmail).catch(() => {});
             }
 
             alert(`Tudo certo, ${nome}! O seu agendamento foi guardado na nuvem com sucesso.`);
