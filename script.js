@@ -61,24 +61,24 @@ if (listaServicos) {
 const produtos = [
     {
         id: 1,
-        nome: "Pomada Modeladora Matte",
+        nome: "Pomada Modeladora Efeito Teia",
         descricao: "Fixação forte e efeito seco para penteados duradouros.",
         preco: "R$ 45,00",
-        imagem: "https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&w=500&q=80"
+        imagem: "https://embaixador.cdn.magazord.com.br/img/2023/12/produto/637/teia-58g-ok.jpg?ims=600x600"
     },
     {
         id: 2,
-        nome: "Óleo Hidratante para Barba",
+        nome: "Hidratante para Barba Needs",
         descricao: "Fórmula com óleos essenciais para amaciar e perfumar a barba.",
         preco: "R$ 38,00",
-        imagem: "https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=500&q=80"
+        imagem: "https://product-data.raiadrogasil.io/images/3503779.webp"
     },
     {
         id: 3,
-        nome: "Shampoo Refrescante Ice",
+        nome: "Shampoo Anticaspa",
         descricao: "Limpeza profunda com extrato de menta para o couro cabeludo.",
         preco: "R$ 32,00",
-        imagem: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=500&q=80"
+        imagem: "https://product-data.raiadrogasil.io/images/17099146.webp"
     }
 ];
 
