@@ -57,6 +57,19 @@ document.getElementById("form-agendamento").addEventListener("submit", function(
         return;
     }
 
+    const dataObjeto = new Date(dataEscolhida + "T00:00:00");
+    const diaDaSemana = dataObjeto.getDay();
+
+    if (diaDaSemana === 1) { 
+        alert("Atenção: A nossa barbearia está fechada às segundas-feiras para descanso da equipe. Por favor, escolha outro dia!");
+        return;
+    }
+
+    if (hora < "10:00" || hora > "18:00") {
+        alert("Atenção: O nosso horário de atendimento é das 10:00 às 18:00. Por favor, escolha um horário válido.");
+        return;
+    }
+
     const novoAgendamento = {
         nome: nome,
         telefone: telefone,
