@@ -7,32 +7,14 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .painel-container { max-width: 950px; margin: 40px auto; padding: 30px; background: white; border-radius: var(--arredondamento); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 40px; font-family: var(--fonte-textos); }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
-        
         th.cabecalho-azul { background-color: var(--cor-azul); color: white; }
         th.cabecalho-vermelho { background-color: var(--cor-vermelha); color: white; }
-        
         tr:hover { background-color: #f8fafd; }
         #conteudo-admin { display: none; }
-        
-        
-        .botao-concluir {
-            background-color: #2e7d32; /* Verde sucesso */
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-        
-        .botao-concluir:hover {
-            background-color: #1b5e20;
-            transform: scale(1.05);
-        }
+        .botao-concluir { background-color: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background-color 0.2s, transform 0.2s; }
+        .botao-concluir:hover { background-color: #1b5e20; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -64,7 +46,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabela-agendamentos">
-                    </tbody>
+                </tbody>
             </table>
 
             <h2>🛒 Controle de Vendas (Loja Virtual)</h2>
@@ -79,14 +61,28 @@
                     </tr>
                 </thead>
                 <tbody id="tabela-pedidos">
-                    </tbody>
+                </tbody>
             </table>
 
         </div>
     </main>
 
-    <script>
-       
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC5I7WEUOo4tlteBuaaHj7NcoU91JHSpek",
+            authDomain: "barbearia-narciso.firebaseapp.com",
+            projectId: "barbearia-narciso",
+            storageBucket: "barbearia-narciso.firebasestorage.app",
+            messagingSenderId: "484721302723",
+            appId: "1:484721302723:web:44b13501687e26c2499676"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         const senhaCorreta = "admin123";
         let tentativa = prompt("Área Restrita do Barbeiro.\nDigite a senha de acesso:");
 
@@ -99,71 +95,80 @@
             window.location.href = "index.html";
         }
 
-        
-        function carregarAgendamentos() {
+        async function carregarAgendamentos() {
             const tabela = document.getElementById("tabela-agendamentos");
-            const agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
-            tabela.innerHTML = "";
+            tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>A carregar da nuvem...</td></tr>";
+            
+            try {
+                const snapshot = await getDocs(collection(db, "agendamentos"));
+                tabela.innerHTML = "";
 
-            if (agendamentos.length === 0) {
-                tabela.innerHTML = "<tr><td colspan='5' style='text-align:center; color: #666;'>Nenhum agendamento pendente.</td></tr>";
-                return;
+                if (snapshot.empty) {
+                    tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Nenhum agendamento pendente.</td></tr>";
+                    return;
+                }
+
+                snapshot.forEach((documento) => {
+                    const agenda = documento.data();
+                    const id = documento.id;
+                    
+                    const linha = document.createElement("tr");
+                    linha.innerHTML = `
+                        <td><strong>${agenda.nome}</strong></td>
+                        <td>${agenda.telefone}</td>
+                        <td>${agenda.servico}</td>
+                        <td>${agenda.data} às ${agenda.hora}</td>
+                        <td><button class="botao-concluir" onclick="excluirAgendamento('${id}')">✔ Concluir</button></td>
+                    `;
+                    tabela.appendChild(linha);
+                });
+            } catch(erro) {
+                tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Erro ao carregar os dados.</td></tr>";
             }
-
-            agendamentos.forEach((agenda, index) => {
-                const linha = document.createElement("tr");
-                linha.innerHTML = `
-                    <td><strong>${agenda.nome}</strong></td>
-                    <td>${agenda.telefone}</td>
-                    <td>${agenda.servico}</td>
-                    <td>${agenda.data} às ${agenda.hora}</td>
-                    <td>
-                        <button class="botao-concluir" onclick="excluirAgendamento(${index})">✔ Concluir</button>
-                    </td>
-                `;
-                tabela.appendChild(linha);
-            });
         }
 
-        function excluirAgendamento(index) {
-            if(confirm("Confirmar que o atendimento foi realizado? Isso apagará o agendamento da lista.")) {
-                let agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
-                agendamentos.splice(index, 1); // Remove 1 item a partir da posição 'index'
-                localStorage.setItem("agendamentos", JSON.stringify(agendamentos));
+        window.excluirAgendamento = async function(id) {
+            if(confirm("Confirmar que o atendimento foi realizado?")) {
+                await deleteDoc(doc(db, "agendamentos", id));
                 carregarAgendamentos();
             }
         }
 
-        function carregarPedidos() {
+        async function carregarPedidos() {
             const tabela = document.getElementById("tabela-pedidos");
-            const pedidos = JSON.parse(localStorage.getItem("pedidos_loja")) || [];
-            tabela.innerHTML = "";
+            tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>A carregar da nuvem...</td></tr>";
+            
+            try {
+                const snapshot = await getDocs(collection(db, "pedidos_loja"));
+                tabela.innerHTML = "";
 
-            if (pedidos.length === 0) {
-                tabela.innerHTML = "<tr><td colspan='5' style='text-align:center; color: #666;'>Nenhuma entrega pendente.</td></tr>";
-                return;
+                if (snapshot.empty) {
+                    tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Nenhuma entrega pendente.</td></tr>";
+                    return;
+                }
+
+                snapshot.forEach((documento) => {
+                    const pedido = documento.data();
+                    const id = documento.id;
+                    
+                    const linha = document.createElement("tr");
+                    linha.innerHTML = `
+                        <td><strong>${pedido.cliente}</strong></td>
+                        <td>${pedido.produto}</td>
+                        <td><strong style="color: var(--cor-vermelha);">${pedido.valor}</strong></td>
+                        <td>${pedido.dataPedido}</td>
+                        <td><button class="botao-concluir" onclick="excluirPedido('${id}')">✔ Entregue</button></td>
+                    `;
+                    tabela.appendChild(linha);
+                });
+            } catch(erro) {
+                tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Erro ao carregar os dados.</td></tr>";
             }
-
-            pedidos.forEach((pedido, index) => {
-                const linha = document.createElement("tr");
-                linha.innerHTML = `
-                    <td><strong>${pedido.cliente}</strong></td>
-                    <td>${pedido.produto}</td>
-                    <td><strong style="color: var(--cor-vermelha);">${pedido.valor}</strong></td>
-                    <td>${pedido.dataPedido}</td>
-                    <td>
-                        <button class="botao-concluir" onclick="excluirPedido(${index})">✔ Entregue</button>
-                    </td>
-                `;
-                tabela.appendChild(linha);
-            });
         }
 
-        function excluirPedido(index) {
+        window.excluirPedido = async function(id) {
             if(confirm("O cliente já pagou e retirou este produto?")) {
-                let pedidos = JSON.parse(localStorage.getItem("pedidos_loja")) || [];
-                pedidos.splice(index, 1);
-                localStorage.setItem("pedidos_loja", JSON.stringify(pedidos));
+                await deleteDoc(doc(db, "pedidos_loja", id));
                 carregarPedidos();
             }
         }
