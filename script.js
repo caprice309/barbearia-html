@@ -1,3 +1,18 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC5I7WEUOo4tlteBuaaHj7NcoU91JHSpek",
+    authDomain: "barbearia-narciso.firebaseapp.com",
+    projectId: "barbearia-narciso",
+    storageBucket: "barbearia-narciso.firebasestorage.app",
+    messagingSenderId: "484721302723",
+    appId: "1:484721302723:web:44b13501687e26c2499676"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const servicos = [
     {
         nome: "Corte Clássico",
@@ -27,82 +42,21 @@ const servicos = [
 
 const listaServicos = document.getElementById("lista-servicos");
 
-servicos.forEach(servico => {
-    const div = document.createElement("div");
-    div.className = "card-servico";
-    
-    div.innerHTML = `
-        <img src="${servico.imagem}" alt="Foto de ${servico.nome}">
-        <h3>${servico.nome}</h3>
-        <p class="descricao-card">${servico.descricao}</p>
-        <p class="preco">${servico.preco}</p>
-    `;
-    
-    listaServicos.appendChild(div);
-});
-
-document.getElementById("form-agendamento").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    const nome = document.getElementById("nome").value;
-    const telefone = document.getElementById("telefone").value;
-    const servico = document.getElementById("servico-escolhido").options[document.getElementById("servico-escolhido").selectedIndex].text;
-    const dataEscolhida = document.getElementById("data").value;
-    const hora = document.getElementById("hora").value;
-
-    const dataAtual = new Date().toISOString().split("T")[0];
-    
-    if (dataEscolhida < dataAtual) {
-        alert("Erro: Não é possível realizar um agendamento numa data que já passou.");
-        return;
-    }
-
-    const dataObjeto = new Date(dataEscolhida + "T00:00:00");
-    const diaDaSemana = dataObjeto.getDay();
-
-    if (diaDaSemana === 1) { 
-        alert("Atenção: A nossa barbearia está fechada às segundas-feiras para descanso da equipe. Por favor, escolha outro dia!");
-        return;
-    }
-
-    if (hora < "10:00" || hora > "18:00") {
-        alert("Atenção: O nosso horário de atendimento é das 10:00 às 18:00. Por favor, escolha um horário válido.");
-        return;
-    }
-
-    const novoAgendamento = {
-        nome: nome,
-        telefone: telefone,
-        servico: servico,
-        data: dataEscolhida,
-        hora: hora
-    };
-
-    let listaAgendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
-    
-    listaAgendamentos.push(novoAgendamento);
-    
-    localStorage.setItem("agendamentos", JSON.stringify(listaAgendamentos));
-
-    alert(`Tudo certo, ${nome}! O seu agendamento foi recebido com sucesso.`);
-
-    const parametrosEmail = {
-        nome_cliente: nome,
-        data_agendamento: dataEscolhida,
-        hora_agendamento: hora,
-        servico: servico
-    };
-
-    emailjs.send("service_04c6d6n", "template_bzkwmpp", parametrosEmail)
-        .then(function(resposta) {
-            console.log('Email enviado com sucesso!', resposta.status, resposta.text);
-        }, function(erro) {
-            console.log('Falha ao enviar o email...', erro);
-        });
-
-    this.reset();
-});
-
+if (listaServicos) {
+    servicos.forEach(servico => {
+        const div = document.createElement("div");
+        div.className = "card-servico";
+        
+        div.innerHTML = `
+            <img src="${servico.imagem}" alt="${servico.nome}">
+            <h3>${servico.nome}</h3>
+            <p class="descricao-card">${servico.descricao}</p>
+            <p class="preco">${servico.preco}</p>
+        `;
+        
+        listaServicos.appendChild(div);
+    });
+}
 
 const produtos = [
     {
@@ -110,45 +64,47 @@ const produtos = [
         nome: "Pomada Modeladora Matte",
         descricao: "Fixação forte e efeito seco para penteados duradouros.",
         preco: "R$ 45,00",
-        imagem: "https://s2-oglobo.glbimg.com/lt8fVQkT8UYqQdD3_3nUqlQFCZ4=/0x0:5148x3607/888x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_da025474c0c44edd99332dddb09cabe8/internal_photos/bs/2022/3/2/T9XTEVTbyJxMzcumoh2Q/close-up-shot-body-cream-with-plain-background.jpg"
+        imagem: "https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&w=500&q=80"
     },
     {
         id: 2,
         nome: "Óleo Hidratante para Barba",
         descricao: "Fórmula com óleos essenciais para amaciar e perfumar a barba.",
         preco: "R$ 38,00",
-        imagem: "https://m.media-amazon.com/images/I/61OzCRoIJyL._AC_SL1500_.jpg"
+        imagem: "https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=500&q=80"
     },
     {
         id: 3,
         nome: "Shampoo Refrescante Ice",
         descricao: "Limpeza profunda com extrato de menta para o couro cabeludo.",
         preco: "R$ 32,00",
-        imagem: "https://knut.com.br/cdn/shop/files/0ef4102ddffb8e57a1f4e41a9906a806.jpg?v=1773347690&width=823"
+        imagem: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=500&q=80"
     }
 ];
 
 const vitrineProdutos = document.getElementById("vitrine-produtos");
-produtos.forEach(produto => {
-    const div = document.createElement("div");
-    div.className = "card-servico";
-    
-    div.innerHTML = `
-        <img src="${produto.imagem}" alt="${produto.nome}">
-        <h3>${produto.nome}</h3>
-        <p class="descricao-card">${produto.descricao}</p>
-        <p class="preco">${produto.preco}</p>
-        <button class="botao-submit" onclick="comprarProduto('${produto.nome}', '${produto.preco}')" style="margin-top: 15px; padding: 10px;">Comprar Agora</button>
-    `;
-    
-    vitrineProdutos.appendChild(div);
-});
 
-function comprarProduto(nomeProduto, precoProduto) {
-    const nomeCliente = prompt(`Você está comprando: ${nomeProduto} por ${precoProduto}.\n\nPor favor, digite seu nome completo para registrar o pedido:`);
+if (vitrineProdutos) {
+    produtos.forEach(produto => {
+        const div = document.createElement("div");
+        div.className = "card-servico";
+        
+        div.innerHTML = `
+            <img src="${produto.imagem}" alt="${produto.nome}">
+            <h3>${produto.nome}</h3>
+            <p class="descricao-card">${produto.descricao}</p>
+            <p class="preco">${produto.preco}</p>
+            <button class="botao-submit" onclick="comprarProduto('${produto.nome}', '${produto.preco}')" style="margin-top: 15px; padding: 10px;">Comprar Agora</button>
+        `;
+        
+        vitrineProdutos.appendChild(div);
+    });
+}
+
+window.comprarProduto = async function(nomeProduto, precoProduto) {
+    const nomeCliente = prompt(`Está a comprar: ${nomeProduto} por ${precoProduto}.\n\nPor favor, digite o seu nome completo para registar o pedido:`);
     
     if (nomeCliente && nomeCliente.trim() !== "") {
-        
         const novoPedido = {
             cliente: nomeCliente,
             produto: nomeProduto,
@@ -156,12 +112,75 @@ function comprarProduto(nomeProduto, precoProduto) {
             dataPedido: new Date().toLocaleDateString('pt-PT')
         };
 
-        let listaPedidos = JSON.parse(localStorage.getItem("pedidos_loja")) || [];
-        listaPedidos.push(novoPedido);
-        localStorage.setItem("pedidos_loja", JSON.stringify(listaPedidos));
-
-        alert(`Pedido confirmado, ${nomeCliente}! O item foi reservado e você pode retirá-lo e pagar na sua próxima visita à barbearia.`);
+        try {
+            await addDoc(collection(db, "pedidos_loja"), novoPedido);
+            alert(`Pedido confirmado na nuvem, ${nomeCliente}! O item foi reservado.`);
+        } catch (erro) {
+            alert("Ocorreu um erro ao comunicar com o servidor.");
+        }
     } else {
-        alert("Compra cancelada. É necessário informar um nome para realizar o pedido.");
+        alert("Compra cancelada. É necessário informar um nome.");
     }
+}
+
+const formAgendamento = document.getElementById("form-agendamento");
+
+if (formAgendamento) {
+    formAgendamento.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const nome = document.getElementById("nome").value;
+        const telefone = document.getElementById("telefone").value;
+        const servicoElement = document.getElementById("servico-escolhido");
+        const servico = servicoElement.options[servicoElement.selectedIndex].text;
+        const dataEscolhida = document.getElementById("data").value;
+        const hora = document.getElementById("hora").value;
+
+        const dataAtual = new Date().toISOString().split("T")[0];
+        
+        if (dataEscolhida < dataAtual) {
+            alert("Erro: Não é possível realizar um agendamento numa data que já passou.");
+            return;
+        }
+
+        const dataObjeto = new Date(dataEscolhida + "T00:00:00");
+        const diaDaSemana = dataObjeto.getDay();
+
+        if (diaDaSemana === 1) {
+            alert("Atenção: A nossa barbearia está fechada às segundas-feiras para descanso da equipe. Por favor, escolha outro dia!");
+            return;
+        }
+
+        if (hora < "10:00" || hora > "18:00") {
+            alert("Atenção: O nosso horário de atendimento é das 10:00 às 18:00. Por favor, escolha um horário válido.");
+            return;
+        }
+
+        const novoAgendamento = {
+            nome: nome,
+            telefone: telefone,
+            servico: servico,
+            data: dataEscolhida,
+            hora: hora
+        };
+
+        try {
+            await addDoc(collection(db, "agendamentos"), novoAgendamento);
+            
+            if (typeof emailjs !== 'undefined') {
+                const parametrosEmail = {
+                    nome_cliente: nome,
+                    data_agendamento: dataEscolhida,
+                    hora_agendamento: hora,
+                    servico: servico
+                };
+                emailjs.send("service_xxxxx", "template_xxxxx", parametrosEmail).catch(() => {});
+            }
+
+            alert(`Tudo certo, ${nome}! O seu agendamento foi guardado na nuvem com sucesso.`);
+            this.reset();
+        } catch (erro) {
+            alert("Ocorreu um erro ao comunicar com o servidor.");
+        }
+    });
 }
