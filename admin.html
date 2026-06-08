@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Barbeiro</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .painel-container { max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: var(--arredondamento); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 40px; font-family: var(--fonte-textos); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        
+        th.cabecalho-azul { background-color: var(--cor-azul); color: white; border-radius: 8px 8px 0 0; }
+        
+        th.cabecalho-vermelho { background-color: var(--cor-vermelha); color: white; border-radius: 8px 8px 0 0; }
+        
+        tr:hover { background-color: #f8fafd; }
+        #conteudo-admin { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span style="font-size: 2.2rem; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">💈</span>
+            <h1>Área Restrita - Barbeiro</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Sair do Painel</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="conteudo-admin">
+        <div class="painel-container">
+            
+            <h2>📅 Agenda de Clientes (Serviços)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="cabecalho-azul">Nome</th>
+                        <th class="cabecalho-azul">Telefone</th>
+                        <th class="cabecalho-azul">Serviço</th>
+                        <th class="cabecalho-azul">Data</th>
+                        <th class="cabecalho-azul">Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-agendamentos">
+                    </tbody>
+            </table>
+
+            <h2>🛒 Controle de Vendas (Loja Virtual)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="cabecalho-vermelho">Cliente</th>
+                        <th class="cabecalho-vermelho">Produto Comprado</th>
+                        <th class="cabecalho-vermelho">Valor</th>
+                        <th class="cabecalho-vermelho">Data do Pedido</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-pedidos">
+                    </tbody>
+            </table>
+
+        </div>
+    </main>
+
+    <script>
+        const senhaCorreta = "admin123";
+        let tentativa = prompt("Área Restrita do Barbeiro.\nDigite a senha de acesso:");
+
+        if (tentativa === senhaCorreta) {
+            document.getElementById("conteudo-admin").style.display = "block";
+            carregarAgendamentos();
+            carregarPedidos();
+        } else {
+            alert("Senha incorreta! Acesso negado.");
+            window.location.href = "index.html";
+        }
+
+        function carregarAgendamentos() {
+            const tabela = document.getElementById("tabela-agendamentos");
+            const agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+            if (agendamentos.length === 0) {
+                tabela.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Nenhum agendamento recebido ainda.</td></tr>";
+                return;
+            }
+
+            agendamentos.forEach(agenda => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td><strong>${agenda.nome}</strong></td>
+                    <td>${agenda.telefone}</td>
+                    <td>${agenda.servico}</td>
+                    <td>${agenda.data}</td>
+                    <td>${agenda.hora}</td>
+                `;
+                tabela.appendChild(linha);
+            });
+        }
+
+        function carregarPedidos() {
+            const tabela = document.getElementById("tabela-pedidos");
+            const pedidos = JSON.parse(localStorage.getItem("pedidos_loja")) || [];
+
+            if (pedidos.length === 0) {
+                tabela.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhuma venda realizada ainda.</td></tr>";
+                return;
+            }
+
+            pedidos.forEach(pedido => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td><strong>${pedido.cliente}</strong></td>
+                    <td>${pedido.produto}</td>
+                    <td><strong style="color: var(--cor-vermelha);">${pedido.valor}</strong></td>
+                    <td>${pedido.dataPedido}</td>
+                `;
+                tabela.appendChild(linha);
+            });
+        }
+    </script>
+</body>
+</html>
